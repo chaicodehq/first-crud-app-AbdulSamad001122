@@ -9,5 +9,20 @@
  * 3. Other errors → Use err.status (or 500) and err.message
  */
 export function errorHandler(err, req, res, next) {
-  // Your code here
+  if (err.name === "ValidationError") {
+    const messages = Object.values(err.errors)
+      .map((e) => e.message)
+      .join(", ");
+
+    return res.status(400).json({
+      error: { message: messages },
+    });
+  }
+
+  if (err.name === "CastError") {
+    return res.status(400).json({ error: { message: "Invalid id format" } });
+  }
+
+  const status = err.status || 500;
+  return res.status(status).json({ error: { message: err.message || "Internal Server Error" } });
 }
